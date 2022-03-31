@@ -142,11 +142,43 @@ app.get("/contacts", async (req, res) => {
             message: "Your token is invalid",
         });
     }
-
-
 });
 
-// Route to 
+// Route to modify a contact:
+app.put("/contacts/:id", async (req, res) => {
+    try {
+        const data = jwt.verify(req.cookies.jwt, secret);
+        const contact = await Contact.findByIdAndUpdate(req.params.id, {
+            userId: data.id,
+            name: req.body.name,
+            email: req.body.email,
+            description: req.body.description,
+            category: req.body.category,
+        });
+        res.json({
+            message: "Contact modified",
+            data: contact,
+        });
+    } catch (err) {
+        return res.status(401).json({
+            message: "Your request is not allowed",
+        });
+    }
+});
+
+// Route to delete a contact:
+app.delete("/contacts/:id", async (req, res) => {
+    try {
+        const contact = await Contact.findByIdAndDelete(req.params.id);
+    } catch (err) {
+        return res.status(400).json({
+            message: "Request not possible. Please check your code.",
+        })
+    }
+    res.status(201).json({
+        message: "Contact deleted",
+    })
+})
 
 // Server start:
 app.listen(8000, () => {
